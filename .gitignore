@@ -1,3 +1,5 @@
 screen_spot_images/
 screen_spot_json/
 training_data/
+model.ckpt
+__pycache__/

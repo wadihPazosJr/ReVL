@@ -27,8 +27,9 @@ class TrainingDataSet(Dataset):
         # TODO: Probably should do resizing so batch in data loader is of same shape
         # Tested, and it still was but as a precaution.
         instruction = row["instruction"]
-        point = row["point"]
-        return img, instruction, point
+        # point = row["point"]
+        label = row["label"]
+        return img, instruction, label
 
 
 def get_data_loader(batch_size=32):
