@@ -1,0 +1,212 @@
+\documentclass{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2023
+
+
+% ready for submission
+\usepackage{neurips_2023}
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2023}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2023}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2023}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+
+\title{ReVL: Midterm Report}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+% \author{%
+%   David S.~Hippocampus\thanks{Use footnote for providing further information
+%     about author (webpage, alternative address)---\emph{not} for acknowledging
+%     funding agencies.} \\
+%   Department of Computer Science\\
+%   Cranberry-Lemon University\\
+%   Pittsburgh, PA 15213 \\
+%   \texttt{hippo@cs.cranberry-lemon.edu} \\
+%   % examples of more authors
+%   % \And
+%   % Coauthor \\
+%   % Affiliation \\
+%   % Address \\
+%   % \texttt{email} \\
+%   % \AND
+%   % Coauthor \\
+%   % Affiliation \\
+%   % Address \\
+%   % \texttt{email} \\
+%   % \And
+%   % Coauthor \\
+%   % Affiliation \\
+%   % Address \\
+%   % \texttt{email} \\
+%   % \And
+%   % Coauthor \\
+%   % Affiliation \\
+%   % Address \\
+%   % \texttt{email} \\
+% }
+
+\begin{document}
+
+
+\maketitle
+
+\section{Introduction}
+
+GUI agents aim to automate tasks on digital devices purely through natural language. Previous attempts at GUI agents varied from utilizing HTML content for web interactions to relying solely on images for actions. The main bottleneck in these attempts has been GUI grounding which is the task of locating screen elements from natural language. The goal of this research is to explore new formulations of the GUI grounding task to achieve state-of-the-art performance. For our data we will be using a set of screenshot, task, bounding box tuples gathered from web, and mobile data. To evaluate our results we plan to use a recently created evaluation benchmark, ScreenSpot, which was made specifically for the GUI Grounding task.
+
+
+\section{Background/Literature}
+For the GUI Agent problem, there has been progress with the rise of LLMs (Kim et al., 2023; Deng et al., 2023). There have also been attempts at only using images (Shaw et al., 2023). Now we see Visual Language Models that are being used for GUI agent tasks as well (Bai et al., 2023; Yan et al., 2023; Hong et al., 2023; Zhang et al., 2024). In addition, Recent publications have found some success in the area of GUI grounding (Cheng et al., 2024), and more work is being done in creating evaluation benchmarks for this specific task (Cheng et al., 2024). To improve on what has been done we are learning from the insight that Gui grounding is the bottleneck (Cheng et al., 2024) and will be trying to achieve state-of-the-art performance on the task to improve the ultimate problem of creating a GUI agent.
+
+\section{Methods/Model}
+As a baseline model, we designed a model that uses ResNet-50 to extract features from the input image and then uses BertTransformer to encode the natural language task. We then concatenate both embeddings and pass them through a linear layer to predict the partition of the image, the task resides in. The input to the model is simply the text instruction along with the image, and the output is a label from 1-10000, which represents a partition of the image, after we split it up into 100x100 partitions.
+
+For training, we used a Cross Entropy Loss objective, and we used a subset of the training data that was used for See-Click. In addition, we evaluated the baseline model on the ScreenSpot benchmark.
+\section{Preliminary Results}
+% \subsection{Figures}
+
+
+% \begin{figure}
+%   \centering
+%   \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+%   \caption{Sample figure caption.}
+% \end{figure}
+
+
+% All artwork must be neat, clean, and legible. Lines should be dark enough for
+% purposes of reproduction. The figure number and caption always appear after the
+% figure. Place one line space before the figure caption and one line space after
+% the figure. The figure caption should be lower case (except for first word and
+% proper nouns); figures are numbered consecutively.
+
+
+% You may use color figures.  However, it is best for the figure captions and the
+% paper body to be legible if the paper is printed in either black/white or in
+% color.
+
+
+% \subsection{Tables}
+
+
+% All tables must be centered, neat, clean and legible.  The table number and
+% title always appear before the table.  See Table~\ref{sample-table}.
+
+
+% Place one line space before the table title, one line space after the
+% table title, and one line space after the table. The table title must
+% be lower case (except for first word and proper nouns); tables are
+% numbered consecutively.
+
+
+% Note that publication-quality tables \emph{do not contain vertical rules.} We
+% strongly suggest the use of the \verb+booktabs+ package, which allows for
+% typesetting high-quality, professional tables:
+% \begin{center}
+%   \url{https://www.ctan.org/pkg/booktabs}
+% \end{center}
+% This package was used to typeset Table~\ref{sample-table}.
+
+
+% \begin{table}
+%   \caption{Sample table title}
+%   \label{sample-table}
+%   \centering
+%   \begin{tabular}{lll}
+%     \toprule
+%     \multicolumn{2}{c}{Part}                   \\
+%     \cmidrule(r){1-2}
+%     Name     & Description     & Size ($\mu$m) \\
+%     \midrule
+%     Dendrite & Input terminal  & $\sim$100     \\
+%     Axon     & Output terminal & $\sim$10      \\
+%     Soma     & Cell body       & up to $10^6$  \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+% \subsection{Math}
+% Note that display math in bare TeX commands will not create correct line numbers for submission. Please use LaTeX (or AMSTeX) commands for unnumbered display math. (You really shouldn't be using \$\$ anyway; see \url{https://tex.stackexchange.com/questions/503/why-is-preferable-to} and \url{https://tex.stackexchange.com/questions/40492/what-are-the-differences-between-align-equation-and-displaymath} for more information.)
+
+
+
+\section{Evaluation of preliminary work}
+
+\section{Future Work}
+
+When thinking about how we as humans interact with computers we look at and focus on wherever we are clicking before we do. This project plans to introduce new formulations of the GUI grounding problem involving focusing on specific regions of the input image to mirror this human behavior in the hopes of seeing improved performance. We will first try splitting the image up into several patches which will be upscaled to the input resolution of the VLM. Then we will try recursively splitting the image up using the model to choose which partition to look into. We will evaluate our final method using ScreenSpot and MiniWob. 
+
+\section{Teammates and Work Division}
+March 11: Implement fine-tuning infrastructure\\
+March 18th: Finish fine-tuning QwenVL and evaluating on ScreenSpot\\
+March 25th: Finish formulation of Mixture of Images Model\\
+April 1st: Finish implementation of Mixture of Images Model, train, and evaluate\\
+April 8th: Finish formulation of Recursive Visual Language Model\\
+April 15th: Finish implementation of Recursive Visual Language Model, train, and evaluate\\
+April 22: Document all findings, write up final report
+
+\section*{References}
+\medskip
+
+
+{
+\small
+[1] Kim, G., Baldi, P., \& McAleer, S. (2023). Language models can solve computer tasks. arXiv. https://arxiv.org/abs/2303.17491
+
+
+[2] Deng, X., Gu, Y., Zheng, B., Chen, S., Stevens, S., Wang, B., Sun, H., \& Su, Y. (2023). Mind2Web: Towards a generalist agent for the web. arXiv. https://arxiv.org/abs/2306.06070
+
+[3] Shaw, P., Joshi, M., Cohan, J., Berant, J., Pasupat, P., Hu, H., Khandelwal, U., Lee, K., \& Toutanova, K. (2023). From pixels to UI actions: Learning to follow instructions via graphical user interfaces. arXiv. https://arxiv.org/abs/2306.00245
+
+[4] Bai, J., Bai, S., Yang, S., Wang, S., Tan, S., Wang, P., Lin, J., Zhou, C., \& Zhou, J. (2023). Qwen-VL: A versatile vision-language model for understanding, localization, text reading, and beyond. arXiv. https://arxiv.org/abs/2308.12966
+
+[5] Yan, A., Yang, Z., Zhu, W., Lin, K., Li, L., Wang, J., Yang, J., Zhong, Y., McAuley, J., Gao, J., Liu, Z., \& Wang, L. (2023). GPT-4V in Wonderland: Large multimodal models for zero-shot smartphone GUI navigation. arXiv. https://arxiv.org/abs/2311.07562
+
+[6] Hong, W., Wang, W., Lv, Q., Xu, J., Yu, W., Ji, J., Wang, Y., Wang, Z., Zhang, Y., Li, J., Xu, B., Dong, Y., Ding, M., \& Tang, J. (2023). CogAgent: A visual language model for GUI agents. arXiv. https://arxiv.org/abs/2312.08914
+
+[7] Cheng, K., Sun, Q., Chu, Y., Xu, F., Li, Y., Zhang, J., \& Wu, Z. (2024). SeeClick: Harnessing GUI grounding for advanced visual GUI agents. arXiv. https://arxiv.org/abs/2401.10935
+
+[8] Zhang, C., Li, L., He, S., Zhang, X., Qiao, B., Qin, S., Ma, M., Kang, Y., Lin, Q., Rajmohan, S., Zhang, D., \& Zhang, Q. (2024). UFO: A UI-focused agent for Windows OS interaction. arXiv. https://arxiv.org/abs/2402.07939
+
+[9] OpenAI. Various publications on LLMs and VLMs for digital interaction.
+
+[10] Rabbit, Startup. "Hardware Solutions for Enhanced VLM Interaction." Internal Report, 2023.
+
+[11] Imbue, Company. "Advancements in Natural Language Processing for GUI Navigation." Tech White Paper, 2023.
+
+[12] Adept, Company. "Integrating VLMs for Desktop Environment Control." Research Findings, 2023.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}

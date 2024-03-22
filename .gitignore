@@ -3,3 +3,4 @@ screen_spot_json/
 training_data/
 model.ckpt
 __pycache__/
+model.path
