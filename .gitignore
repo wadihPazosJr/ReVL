@@ -4,3 +4,4 @@ training_data/
 model.ckpt
 __pycache__/
 model.path
+.venv/
