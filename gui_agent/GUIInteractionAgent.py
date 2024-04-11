@@ -11,8 +11,11 @@ from langchain.agents.format_scratchpad.openai_tools import (
     format_to_openai_tool_messages,
 )
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
+from langchain_core.messages import AIMessage, HumanMessage
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+# from utils import run_agent
+
+# llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 
 class MoveMouseInput(BaseModel):
@@ -68,7 +71,7 @@ class WriteInput(BaseModel):
 
 @tool(args_schema=WriteInput)
 def write(text):
-    """Write the specified text"""
+    """Types out the specified text. This should be used when writing text in an input field or text editor, or when writing long blocks of code."""
     gui.write(text)
 
 
@@ -97,6 +100,16 @@ def open_spotlight(query):
     press_key("enter")
 
 
+@tool
+def run_command(keys):
+    """Given a sequence of keys, presses them in order. For example: ['command', 'space']"""
+    for key in keys:
+        key_down(key)
+
+    for key in keys:
+        key_up(key)
+
+
 tools = [
     move_mouse,
     click,
@@ -109,35 +122,72 @@ tools = [
     # get_mouse_position,
     # get_screenshot,
     open_spotlight,
+    run_command,
 ]
 
-llm_with_tools = llm.bind_tools(tools)
+
+# llm_with_tools = llm.bind_tools(tools)
 
 prompt_message = """"You are a very powerful AI agent that can interact with the GUI of a Mac computer.
 You can move the mouse, click, press keys, write text, and open the spotlight. You can use these tools to perform tasks on the computer.
-You will be given a task to perform on the GUI, and you will need to use the tools to complete the task."""
+You will be given a state which describes the current state of the GUI, and you will need to perform a task on the GUI to change the state.
+You will be given a task to perform on the GUI, and you will need to use the tools to complete the task.
+You should take your task literally, and take into consideration the context of the state you are in. 
+You should always prefer using the keyboard versus the mouse and clicking when possible. Thus, you should search for commands that can be done with the keyboard first, before defaulting to the mouse."""
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", prompt_message),
-        ("user", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad"),
-    ]
-)
+MEMORY_KEY = "chat_history"
 
-agent = (
-    {
-        "input": lambda x: x["input"],
-        "agent_scratchpad": lambda x: format_to_openai_tool_messages(
-            x["intermediate_steps"]
-        ),
-    }
-    | prompt
-    | llm_with_tools
-    | OpenAIToolsAgentOutputParser()
-)
+# prompt = ChatPromptTemplate.from_messages(
+#     [
+#         ("system", prompt_message),
+#         MessagesPlaceholder(variable_name=MEMORY_KEY),
+#         ("user", "{input}"),
+#         MessagesPlaceholder(variable_name="agent_scratchpad"),
+#     ]
+# )
 
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+class GUIAgent:
+    def __init__(self, llm, verbose=True):
+        self.llm_with_tools = llm.bind_tools(tools)
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", prompt_message),
+                MessagesPlaceholder(variable_name=MEMORY_KEY),
+                ("user", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
+
+        self.chat_history = []
+        self.agent = (
+            {
+                "input": lambda x: x["input"],
+                "agent_scratchpad": lambda x: format_to_openai_tool_messages(
+                    x["intermediate_steps"]
+                ),
+                "chat_history": lambda x: x["chat_history"],
+            }
+            | self.prompt
+            | self.llm_with_tools
+            | OpenAIToolsAgentOutputParser()
+        )
+        self.agent_executor = AgentExecutor(
+            agent=self.agent, tools=tools, verbose=verbose
+        )
+
+    def run(self, input_text):
+        result = self.agent_executor.invoke(
+            {"input": input_text, "chat_history": self.chat_history}
+        )
+        self.chat_history.extend(
+            [HumanMessage(content=input_text), AIMessage(content=result["output"])]
+        )
+
+        return result["output"]
+
+
+# GUIInteractionAgentExecutor = AgentExecutor(agent=GUIAgent, tools=tools, verbose=True)
 
 # out = list(
 #     agent_executor.stream(
@@ -145,32 +195,15 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 #     )
 # )
 
-out = list(
-    agent_executor.stream(
-        {
-            "input": "Open the application 'messages', then click on the coordinate (2710, 830), then write 'Sending you this with my AI!' and press enter."
-        }
-    )
-)
-
-# print("===========")
-
-# print(out)
+# out = list(
+#     agent_executor.stream(
+#         {
+#             "input": "Open the application 'messages', then click on the coordinate (2710, 830), then write 'Sending you this with my AI!' and press enter."
+#         }
+#     )
+# )
 
 
-# Usage
-# agent = GUIAgent()
+# input_text = "Open the application 'messages', then click on the coordinate (2710, 830), then write 'Sending you this with my AI!' and press enter."
 
-# screen_size = agent.get_screen_size()
-# print(screen_size)
-
-# mouse_position = agent.get_mouse_position()
-# print(mouse_position)
-
-# agent.open_spotlight()
-# agent.write("arc")
-# agent.press_key("enter")
-# agent.move_and_click(2071, 136)
-
-# screenshot = agent.get_screenshot()
-# screenshot.show()
+# out = run_agent(agent_executor, input_text)
